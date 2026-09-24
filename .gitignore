@@ -1,0 +1,14 @@
+# Build output
+build/
+out/
+dist/
+selftest_out/
+uitest_out/
+
+# IDE and local settings
+.vs/
+.vscode/
+.idea/
+*.user
+CMakeUserPresets.json
+.cache/
