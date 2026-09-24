@@ -302,6 +302,10 @@ for it.
 
 ## Building and testing
 
+Ready-made Windows builds are on the [Releases](https://github.com/Kalikoff/Kolorit/releases) page.
+Pushing a tag such as `v1.0.1` makes the Build workflow publish a new release with the zipped build.
+
+
 Requirements: CMake 3.21 or newer, Qt 6.5 or newer (Core, Gui, Widgets, Concurrent, Svg,
 LinguistTools) and a C++20 compiler (MSVC 2022+, GCC 11+, Clang 14+). Kolorit is developed and
 tested on Windows; the code uses only portable Qt, but other platforms have not been verified.

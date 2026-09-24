@@ -253,6 +253,10 @@ kolorit-cli --palette "Sweetie 16" --model lab --dither floyd --out Results Imag
 
 ## Сборка
 
+Готовые сборки для Windows лежат на странице [Releases](https://github.com/Kalikoff/Kolorit/releases).
+Новый релиз публикуется сам, если отправить тег вида `v1.0.1`: workflow Build соберёт программу и приложит архив.
+
+
 Нужны CMake 3.21+, Qt 6.5+ (Core, Gui, Widgets, Concurrent, Svg, LinguistTools) и компилятор
 с C++20 (MSVC 2022+, GCC 11+, Clang 14+). Kolorit разрабатывается и проверяется на Windows; код
 использует только переносимый Qt, но на других системах сборка пока не проверялась.

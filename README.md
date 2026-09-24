@@ -108,9 +108,9 @@ Use a built-in palette by name (`kolorit-cli --list-palettes`) or any N×1 PNG. 
 
 ## Getting started
 
-Ready-to-run Windows builds are attached to every run of the
-[Build workflow](https://github.com/Kalikoff/Kolorit/actions/workflows/build.yml)
-(open a run and download **Kolorit-windows-x64**).
+**Download** the latest Windows build from
+[Releases](https://github.com/Kalikoff/Kolorit/releases/latest): unzip it and run
+`bin\Kolorit.exe`, no installation needed.
 
 Kolorit is written in C++20 with Qt 6 and builds with CMake 3.21+. It is developed on
 Windows; the code is portable Qt, but other platforms have not been tested yet.

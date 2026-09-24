@@ -1,5 +1,7 @@
 name: Build
 
+# Every push and pull request is built and tested. A pushed tag such as v1.0.0
+# additionally publishes a GitHub release with the zipped Windows build.
 on:
   push:
   pull_request:
@@ -7,6 +9,8 @@ on:
 jobs:
   windows:
     runs-on: windows-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
 
@@ -33,3 +37,19 @@ jobs:
         with:
           name: Kolorit-windows-x64
           path: dist
+
+      - name: Zip the release
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          Rename-Item dist "Kolorit-${{ github.ref_name }}"
+          Compress-Archive -Path "Kolorit-${{ github.ref_name }}" -DestinationPath "Kolorit-${{ github.ref_name }}-windows-x64.zip"
+
+      - name: Publish the release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: Kolorit-${{ github.ref_name }}-windows-x64.zip
+          generate_release_notes: true
+          body: |
+            Windows x64 build. No installation needed: unzip the archive and run `bin\Kolorit.exe`.
+            The command-line tool `bin\kolorit-cli.exe` is in the same folder.
