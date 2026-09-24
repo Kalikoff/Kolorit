@@ -18,7 +18,7 @@ jobs:
           cache: true
 
       - name: Configure
-        run: cmake -B build -G "Visual Studio 17 2022" -A x64 -DCMAKE_PREFIX_PATH="$env:QT_ROOT_DIR"
+        run: cmake -B build -A x64 -DCMAKE_PREFIX_PATH="$env:QT_ROOT_DIR"
 
       - name: Build
         run: cmake --build build --config Release --parallel
