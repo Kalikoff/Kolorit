@@ -194,7 +194,8 @@ kolorit-cli --palette "Sweetie 16" --model lab --dither floyd --out Results Imag
 `kolorit-cli --list-palettes`. Так скрипты работают одинаково при любом языке системы.
 
 Отдельный исполняемый файл нужен из-за подсистемы Windows: `Kolorit.exe` собран как оконный (WIN32),
-у такого нет консоли — вывод уходил бы в никуда, а оболочка не дожидалась бы завершения.
+у такого нет консоли — вывод уходил бы в никуда, а оболочка не дожидалась бы завершения. На macOS утилита
+лежит внутри бандла и использует его библиотеки Qt: `/Applications/Kolorit.app/Contents/MacOS/kolorit-cli`.
 
 ### Живой предпросмотр
 Диалоги эффектов **немодальные**: пока подбираются параметры, главное окно остаётся живым — картинку можно
@@ -226,7 +227,8 @@ kolorit-cli --palette "Sweetie 16" --model lab --dither floyd --out Results Imag
   и потому идёт в фоне, с прогрессом и отменой по Esc. Цепочка из десяти операций пересчитывается
   за 35 мс на 1,1 Мп и за 306 мс на 9,7 Мп. Шаг вперёд считается от текущего изображения, то есть
   стоит ровно одну операцию.
-* Рядом с exe создаются каталоги `Images/`, `Results/`, `Palette/` — их по умолчанию открывают диалоги файлов.
+* Рядом с exe (на macOS — в `~/Documents/Kolorit`) создаются каталоги `Images/`, `Results/`, `Palette/` —
+  их по умолчанию открывают диалоги файлов.
 
 ## Многопоточность
 
@@ -253,21 +255,21 @@ kolorit-cli --palette "Sweetie 16" --model lab --dither floyd --out Results Imag
 
 ## Сборка
 
-Готовые сборки для Windows лежат на странице [Releases](https://github.com/Kalikoff/Kolorit/releases).
-Новый релиз публикуется сам, если отправить тег вида `v1.0.1`: workflow Build соберёт программу и приложит архив.
+Готовые сборки для Windows и macOS лежат на странице [Releases](https://github.com/Kalikoff/Kolorit/releases).
+Workflow Build собирает и тестирует обе платформы на каждый push; если отправить тег вида `v1.0.1`,
+он ещё и опубликует релиз с архивом для Windows и образом диска для macOS.
 
-
-Нужны CMake 3.21+, Qt 6.5+ (Core, Gui, Widgets, Concurrent, Svg, LinguistTools) и компилятор
-с C++20 (MSVC 2022+, GCC 11+, Clang 14+). Kolorit разрабатывается и проверяется на Windows; код
-использует только переносимый Qt, но на других системах сборка пока не проверялась.
+Нужны CMake 3.21+, Qt 6.10+ (Core, Gui, Widgets, Concurrent, Svg, LinguistTools; для WebP — дополнение
+Image Formats) и компилятор с C++20 (MSVC 2022+, GCC 11+, Clang 14+). Kolorit собирается и проверяется
+на Windows и macOS 13+.
 
 Пресеты ищут Qt по переменной окружения `QTDIR`. Можно вместо этого передать
 `-DCMAKE_PREFIX_PATH=<путь к Qt>` или завести свои пресеты в `CMakeUserPresets.json`.
 
-Visual Studio 2022 или 2026:
+**Windows**, Visual Studio 2022 или 2026:
 
 ```bat
-set QTDIR=C:\Qt\6.8.3\msvc2022_64
+set QTDIR=C:\Qt\6.10.2\msvc2022_64
 cmake --preset vs2022
 cmake --build --preset vs2022-release
 ```
@@ -279,7 +281,18 @@ cmake --preset ninja-release
 cmake --build --preset ninja-release
 ```
 
-Исполняемые файлы: `build/<preset>/bin/`. Для запуска из каталога сборки в `PATH` должен быть
+**macOS**: нужны Xcode Command Line Tools (`xcode-select --install`), CMake и Ninja:
+
+```bash
+export QTDIR=~/Qt/6.10.2/macos
+cmake --preset ninja-release
+cmake --build --preset ninja-release
+```
+
+С `-DCMAKE_OSX_ARCHITECTURES="arm64;x86_64"` на шаге конфигурации получится универсальная сборка
+для Apple Silicon и Intel — так собирается релиз.
+
+Исполняемые файлы: `build/<preset>/bin/`. На Windows для запуска из каталога сборки в `PATH` должен быть
 `<Qt>/bin`; либо соберите переносимую версию с библиотеками, плагинами и переводами Qt
 (префикс должен быть абсолютным путём):
 
@@ -287,10 +300,21 @@ cmake --build --preset ninja-release
 cmake --install build/vs2022 --config Release --prefix %CD%\dist
 ```
 
+На macOS установка даёт `dist/Kolorit.app` с фреймворками Qt, `kolorit-cli` внутри бандла и ad hoc
+подписью, без которой приложение не запустится на Apple Silicon:
+
+```bash
+cmake --install build/ninja-release --prefix "$PWD/dist"
+```
+
 Тесты:
 
 ```bat
 ctest --preset vs2022-release
+```
+
+```bash
+ctest --preset ninja-release
 ```
 
 * `kolorit_selftest <изображение|-> <каталог>` прогоняет все операции ядра в 1 и в N потоков,

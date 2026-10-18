@@ -13,7 +13,7 @@
   <a href="https://github.com/Kalikoff/Kolorit/actions/workflows/build.yml"><img src="https://github.com/Kalikoff/Kolorit/actions/workflows/build.yml/badge.svg" alt="Build"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-3b82f6" alt="MIT license"></a>
   <img src="https://img.shields.io/badge/C%2B%2B-20-6366f1" alt="C++20">
-  <img src="https://img.shields.io/badge/Qt-6.5%2B-41cd52" alt="Qt 6.5+">
+  <img src="https://img.shields.io/badge/Qt-6.10%2B-41cd52" alt="Qt 6.10+">
   <img src="https://img.shields.io/badge/languages-English%20%7C%20Русский-f59e0b" alt="English and Russian">
 </p>
 
@@ -108,30 +108,46 @@ Use a built-in palette by name (`kolorit-cli --list-palettes`) or any N×1 PNG. 
 
 ## Getting started
 
-**Download** the latest Windows build from
-[Releases](https://github.com/Kalikoff/Kolorit/releases/latest): unzip it and run
-`bin\Kolorit.exe`, no installation needed.
+**Download** the latest build from
+[Releases](https://github.com/Kalikoff/Kolorit/releases/latest):
 
-Kolorit is written in C++20 with Qt 6 and builds with CMake 3.21+. It is developed on
-Windows; the code is portable Qt, but other platforms have not been tested yet.
+- **Windows x64**: unzip the archive and run `bin\Kolorit.exe`, no installation needed.
+- **macOS 13+** (Apple Silicon and Intel): open the `.dmg` and drag Kolorit to Applications.
+  The app is not notarized, so allow the first launch in System Settings → Privacy & Security
+  (*Open Anyway*).
+
+Kolorit is written in C++20 with Qt 6.10 and builds with CMake 3.21+ on Windows and macOS.
 
 ```bat
-:: Tell CMake where Qt lives
-set QTDIR=C:\Qt\6.8.3\msvc2022_64
+:: Windows: tell CMake where Qt lives
+set QTDIR=C:\Qt\6.10.2\msvc2022_64
 
 cmake --preset vs2022
 cmake --build --preset vs2022-release
 ctest --preset vs2022-release
 ```
 
-The app lands in `build/vs2022/bin/Kolorit.exe`. To get a self-contained folder with the
-Qt libraries next to it:
+```bash
+# macOS: Xcode Command Line Tools, CMake and Ninja
+export QTDIR=~/Qt/6.10.2/macos
+
+cmake --preset ninja-release
+cmake --build --preset ninja-release
+ctest --preset ninja-release
+```
+
+The app lands in `build/<preset>/bin/` (`Kolorit.exe` or `Kolorit.app`). To get a
+self-contained copy with the Qt libraries (a folder on Windows, a signed `Kolorit.app` on macOS):
 
 ```bat
 cmake --install build/vs2022 --config Release --prefix %CD%\dist
 ```
 
-Presets for Visual Studio 2026 and Ninja are included too. The [guide](docs/GUIDE.md) covers
+```bash
+cmake --install build/ninja-release --prefix "$PWD/dist"
+```
+
+A preset for Visual Studio 2026 is included too. The [guide](docs/GUIDE.md) covers
 building, the architecture and every feature in detail.
 
 ## Documentation

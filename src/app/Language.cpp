@@ -71,10 +71,14 @@ void install()
 
     // Standard dialog buttons and the file dialog come from Qt's own catalog. The Qt
     // installation has it as qtbase_xx.qm; windeployqt merges the modules into qt_xx.qm
-    // and qt.conf points QLibraryInfo at the deployed folder.
+    // and qt.conf points QLibraryInfo at the deployed folder. In the macOS bundle the
+    // install step puts qtbase_xx.qm into Contents/Resources/translations.
     const QStringList qtDirs = {
         QLibraryInfo::path(QLibraryInfo::TranslationsPath),
         QDir(QCoreApplication::applicationDirPath()).filePath(QStringLiteral("translations")),
+#ifdef Q_OS_MACOS
+        QDir(QCoreApplication::applicationDirPath()).filePath(QStringLiteral("../Resources/translations")),
+#endif
     };
     for (const QString& dir : qtDirs) {
         for (const QString& name : {QStringLiteral("qtbase_%1"), QStringLiteral("qt_%1")}) {

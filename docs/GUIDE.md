@@ -233,7 +233,7 @@ live preview. Most dialogs can save their settings as named presets.
   9.7 megapixels. Going forward costs exactly one operation.
 - **Saving**: PNG, JPEG, BMP or WebP. Formats without transparency get a flattened image.
 - **Working folders.** `Images/`, `Results/` and `Palette/` are created next to the executable
-  as default locations for the file dialogs.
+  (on macOS in `~/Documents/Kolorit`) as default locations for the file dialogs.
 
 ## Interface
 
@@ -298,25 +298,27 @@ everywhere. The exit code is 0 on success, 1 if some files failed and 2 for inva
 
 On Windows the command-line tool is a separate executable because `Kolorit.exe` is a GUI
 application: it has no console, so its output would go nowhere and the shell would not wait
-for it.
+for it. On macOS it lives inside the app bundle and shares its Qt libraries:
+`/Applications/Kolorit.app/Contents/MacOS/kolorit-cli`.
 
 ## Building and testing
 
-Ready-made Windows builds are on the [Releases](https://github.com/Kalikoff/Kolorit/releases) page.
-Pushing a tag such as `v1.0.1` makes the Build workflow publish a new release with the zipped build.
+Ready-made builds for Windows and macOS are on the
+[Releases](https://github.com/Kalikoff/Kolorit/releases) page. The Build workflow builds and
+tests both platforms on every push; pushing a tag such as `v1.0.1` also publishes a release with
+the zipped Windows build and the macOS disk image.
 
-
-Requirements: CMake 3.21 or newer, Qt 6.5 or newer (Core, Gui, Widgets, Concurrent, Svg,
-LinguistTools) and a C++20 compiler (MSVC 2022+, GCC 11+, Clang 14+). Kolorit is developed and
-tested on Windows; the code uses only portable Qt, but other platforms have not been verified.
+Requirements: CMake 3.21 or newer, Qt 6.10 or newer (Core, Gui, Widgets, Concurrent, Svg,
+LinguistTools; the Image Formats add-on for WebP) and a C++20 compiler (MSVC 2022+, GCC 11+,
+Clang 14+). Kolorit is built and tested on Windows and macOS 13+.
 
 The presets find Qt through the `QTDIR` environment variable. Alternatively, pass
 `-DCMAKE_PREFIX_PATH=<Qt path>` or add your own presets in `CMakeUserPresets.json`.
 
-Visual Studio 2022 or 2026:
+**Windows**, Visual Studio 2022 or 2026:
 
 ```bat
-set QTDIR=C:\Qt\6.8.3\msvc2022_64
+set QTDIR=C:\Qt\6.10.2\msvc2022_64
 cmake --preset vs2022
 cmake --build --preset vs2022-release
 ```
@@ -328,18 +330,40 @@ cmake --preset ninja-release
 cmake --build --preset ninja-release
 ```
 
-The executables land in `build/<preset>/bin/`. To run them from there, `<Qt>/bin` must be on
-`PATH`; or install a self-contained copy with the Qt libraries, plugins and translations
-(the prefix must be an absolute path):
+**macOS** needs the Xcode Command Line Tools (`xcode-select --install`), CMake and Ninja:
+
+```bash
+export QTDIR=~/Qt/6.10.2/macos
+cmake --preset ninja-release
+cmake --build --preset ninja-release
+```
+
+Add `-DCMAKE_OSX_ARCHITECTURES="arm64;x86_64"` to the configure step for a universal build that
+runs on both Apple Silicon and Intel; the release build is made this way.
+
+The executables land in `build/<preset>/bin/`. On Windows, to run them from there, `<Qt>/bin`
+must be on `PATH`; or install a self-contained copy with the Qt libraries, plugins and
+translations (the prefix must be an absolute path):
 
 ```bat
 cmake --install build/vs2022 --config Release --prefix %CD%\dist
+```
+
+On macOS the install step produces `dist/Kolorit.app` with the Qt frameworks, `kolorit-cli`
+inside the bundle and an ad hoc signature, so it runs on Apple Silicon:
+
+```bash
+cmake --install build/ninja-release --prefix "$PWD/dist"
 ```
 
 **Tests**
 
 ```bat
 ctest --preset vs2022-release
+```
+
+```bash
+ctest --preset ninja-release
 ```
 
 - `kolorit_selftest <image|-> <folder>` runs every core operation on one thread and on all of

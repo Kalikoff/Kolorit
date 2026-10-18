@@ -4,7 +4,7 @@
 
 namespace kolorit::AppPaths {
 
-/// Working folders next to the executable:
+/// Working folders next to the executable (on macOS in ~/Documents/Kolorit):
 /// Images for source pictures, Results for output, Palette for user palettes.
 QString imagesDir();
 QString resultsDir();

@@ -1,24 +1,28 @@
 name: Build
 
-# Every push and pull request is built and tested. A pushed tag such as v1.0.0
-# additionally publishes a GitHub release with the zipped Windows build.
+# Every push and pull request is built and tested on Windows and macOS. A pushed tag
+# such as v1.0.0 additionally publishes a GitHub release with both builds.
 on:
   push:
   pull_request:
 
+env:
+  QT_VERSION: '6.10.2'
+
 jobs:
   windows:
     runs-on: windows-latest
-    permissions:
-      contents: write
     steps:
       - uses: actions/checkout@v4
 
       - name: Install Qt
         uses: jurplel/install-qt-action@v4
         with:
-          version: '6.8.3'
+          version: ${{ env.QT_VERSION }}
           arch: win64_msvc2022_64
+          # qtimageformats brings the WebP plugin
+          modules: qtimageformats
+          aqtversion: '==3.3.*'
           cache: true
 
       - name: Configure
@@ -38,18 +42,79 @@ jobs:
           name: Kolorit-windows-x64
           path: dist
 
-      - name: Zip the release
-        if: startsWith(github.ref, 'refs/tags/v')
+  macos:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: ${{ env.QT_VERSION }}
+          arch: clang_64
+          modules: qtimageformats
+          aqtversion: '==3.3.*'
+          cache: true
+
+      # Qt for macOS ships universal binaries, so one build runs on Apple Silicon and Intel
+      - name: Configure
+        run: >
+          cmake -B build -DCMAKE_BUILD_TYPE=Release
+          -DCMAKE_PREFIX_PATH="$QT_ROOT_DIR"
+          -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64"
+
+      - name: Build
+        run: cmake --build build --parallel
+
+      - name: Test
+        run: ctest --test-dir build --output-on-failure
+
+      - name: Package
         run: |
-          Rename-Item dist "Kolorit-${{ github.ref_name }}"
-          Compress-Archive -Path "Kolorit-${{ github.ref_name }}" -DestinationPath "Kolorit-${{ github.ref_name }}-windows-x64.zip"
+          cmake --install build --prefix dist
+          codesign --verify --deep --strict dist/Kolorit.app
+          # A drag-to-install disk image: the app next to a link to /Applications.
+          # hdiutil occasionally fails with "Resource busy" on CI, hence the retries.
+          ln -s /Applications dist/Applications
+          for attempt in 1 2 3; do
+            hdiutil create -volname Kolorit -srcfolder dist -format UDZO -o Kolorit-macos-universal.dmg && break
+            sleep 10
+          done
+          test -f Kolorit-macos-universal.dmg
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Kolorit-macos-universal
+          path: Kolorit-macos-universal.dmg
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [windows, macos]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+
+      - name: Prepare the files
+        run: |
+          mv Kolorit-windows-x64 "Kolorit-${{ github.ref_name }}"
+          zip -rq "Kolorit-${{ github.ref_name }}-windows-x64.zip" "Kolorit-${{ github.ref_name }}"
+          mv Kolorit-macos-universal/Kolorit-macos-universal.dmg "Kolorit-${{ github.ref_name }}-macos-universal.dmg"
 
       - name: Publish the release
-        if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
-          files: Kolorit-${{ github.ref_name }}-windows-x64.zip
+          files: |
+            Kolorit-${{ github.ref_name }}-windows-x64.zip
+            Kolorit-${{ github.ref_name }}-macos-universal.dmg
           generate_release_notes: true
           body: |
-            Windows x64 build. No installation needed: unzip the archive and run `bin\Kolorit.exe`.
+            **Windows x64.** No installation needed: unzip the archive and run `bin\Kolorit.exe`.
             The command-line tool `bin\kolorit-cli.exe` is in the same folder.
+
+            **macOS 13 or newer, Apple Silicon and Intel.** Open the disk image and drag Kolorit
+            to Applications. The app is not notarized, so macOS blocks the first launch: open
+            System Settings → Privacy & Security and click *Open Anyway*, or run
+            `xattr -dr com.apple.quarantine /Applications/Kolorit.app`.
+            The command-line tool is `/Applications/Kolorit.app/Contents/MacOS/kolorit-cli`.
