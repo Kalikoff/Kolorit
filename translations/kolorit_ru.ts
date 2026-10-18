@@ -431,7 +431,7 @@
         <translation>Снизу справа</translation>
     </message>
     <message>
-        <location filename="../src/ui/MainWindow.cpp" line="+57"/>
+        <location filename="../src/ui/MainWindow.cpp" line="+60"/>
         <source>Error</source>
         <translation>Ошибка</translation>
     </message>
@@ -750,12 +750,12 @@
     <name>kolorit::MainWindow</name>
     <message>
         <location filename="../src/ui/MainWindow.cpp" line="+40"/>
-        <location line="+339"/>
+        <location line="+345"/>
         <source>%1 %</source>
         <translation>%1 %</translation>
     </message>
     <message>
-        <location line="-302"/>
+        <location line="-308"/>
         <source>%1 (%2)</source>
         <translation>%1 (%2)</translation>
     </message>
@@ -1006,40 +1006,40 @@
     </message>
     <message>
         <location line="+7"/>
-        <location line="+116"/>
+        <location line="+122"/>
         <source>Effects</source>
         <translation>Эффекты</translation>
     </message>
     <message>
-        <location line="-106"/>
-        <location line="+898"/>
+        <location line="-112"/>
+        <location line="+904"/>
         <source>Invert</source>
         <translation>Инверсия</translation>
     </message>
     <message>
-        <location line="-898"/>
+        <location line="-904"/>
         <source>Invert the colors</source>
         <translation>Обратить цвета</translation>
     </message>
     <message>
         <location line="+1"/>
-        <location line="+902"/>
+        <location line="+908"/>
         <source>Grayscale</source>
         <translation>Оттенки серого</translation>
     </message>
     <message>
-        <location line="-902"/>
+        <location line="-908"/>
         <source>Remove color, keep luminance</source>
         <translation>Убрать цвет, оставив яркость</translation>
     </message>
     <message>
         <location line="+1"/>
-        <location line="+906"/>
+        <location line="+912"/>
         <source>Sepia</source>
         <translation>Сепия</translation>
     </message>
     <message>
-        <location line="-906"/>
+        <location line="-912"/>
         <source>The warm brown tone of an old photograph</source>
         <translation>Тёплый коричневый тон старой фотографии</translation>
     </message>
@@ -1215,12 +1215,12 @@
     </message>
     <message>
         <location line="+13"/>
-        <location line="+152"/>
+        <location line="+158"/>
         <source>Language</source>
         <translation>Язык</translation>
     </message>
     <message>
-        <location line="-145"/>
+        <location line="-151"/>
         <source>System default</source>
         <translation>Как в системе</translation>
     </message>
@@ -1241,6 +1241,16 @@
     </message>
     <message>
         <location line="+3"/>
+        <source>Check for updates…</source>
+        <translation>Проверить обновления…</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>Check for updates at startup</source>
+        <translation>Проверять обновления при запуске</translation>
+    </message>
+    <message>
+        <location line="+4"/>
         <location line="+1363"/>
         <source>About Kolorit</source>
         <translation>О программе</translation>
@@ -2243,7 +2253,53 @@ For photos, a k-means palette works better.</source>
         <translation>&lt;h3&gt;Kolorit %1&lt;/h3&gt;&lt;p&gt;Перекраска изображений в заданную палитру и ретро-эффекты.&lt;/p&gt;&lt;p&gt;Приложение заменяет каждый пиксель изображения ближайшим цветом из палитры в выбранной цветовой модели (RGB, HSL, HSV, XYZ, CIE Lab) с дизерингом или без, строит палитры из изображения (чанки, k-средних, уникальные цвета) и накладывает эффекты, включая настраиваемый эффект VHS-камеры.&lt;/p&gt;&lt;p&gt;Вся обработка выполняется параллельно по строкам изображения на всех ядрах процессора (сейчас: %2 потоков) с отменой и индикацией прогресса.&lt;/p&gt;&lt;p&gt;Свободная программа под лицензией MIT.&lt;/p&gt;&lt;p&gt;Qt %3 · C++20&lt;/p&gt;</translation>
     </message>
     <message>
-        <location line="+44"/>
+        <location line="+37"/>
+        <location line="+6"/>
+        <source>Updates</source>
+        <translation>Обновления</translation>
+    </message>
+    <message>
+        <location line="-6"/>
+        <source>Could not check for updates: %1</source>
+        <translation>Не удалось проверить обновления: %1</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>You have the latest version, Kolorit %1.</source>
+        <translation>У вас последняя версия — Kolorit %1.</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Update available</source>
+        <translation>Доступно обновление</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>&lt;b&gt;Kolorit %1 is available&lt;/b&gt;</source>
+        <translation>&lt;b&gt;Вышла версия Kolorit %1&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>You have version %1. The download opens in the browser.</source>
+        <translation>У вас версия %1. Загрузка откроется в браузере.</translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>Download</source>
+        <translation>Скачать</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Skip this version</source>
+        <translation>Пропустить эту версию</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Later</source>
+        <translation>Позже</translation>
+    </message>
+    <message>
+        <location line="+39"/>
         <source>Dropped image</source>
         <translation>Перетащенное изображение</translation>
     </message>
@@ -2904,6 +2960,14 @@ Add colors with the &quot;+&quot; button, load a file, pick a builtin palette or
         <location line="+96"/>
         <source>Text color</source>
         <translation>Цвет текста</translation>
+    </message>
+</context>
+<context>
+    <name>kolorit::updates</name>
+    <message>
+        <location filename="../src/app/Updates.cpp" line="+87"/>
+        <source>Unexpected answer from GitHub</source>
+        <translation>Непонятный ответ от GitHub</translation>
     </message>
 </context>
 </TS>

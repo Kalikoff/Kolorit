@@ -2,6 +2,7 @@
 
 #include "app/AppPaths.h"
 #include "app/Language.h"
+#include "app/Updates.h"
 #include "core/BuiltinPalettes.h"
 #include "core/ColorSpace.h"
 #include "processing/ConsoleEffect.h"
@@ -22,6 +23,7 @@
 #include <QApplication>
 #include <QClipboard>
 #include <QCloseEvent>
+#include <QDesktopServices>
 #include <QDir>
 #include <QDockWidget>
 #include <QDragEnterEvent>
@@ -36,6 +38,7 @@
 #include <QMimeData>
 #include <QProcess>
 #include <QProgressBar>
+#include <QPushButton>
 #include <QSettings>
 #include <QSpinBox>
 #include <QStandardPaths>
@@ -355,6 +358,12 @@ void MainWindow::buildMenus()
     paletteDockAction->setText(tr("Palette panel"));
     m_moreMenu->addAction(paletteDockAction);
     m_moreMenu->addSeparator();
+    m_actCheckUpdates = m_moreMenu->addAction(tr("Check for updates…"), this, &MainWindow::checkForUpdates);
+    m_iconNames.insert(m_actCheckUpdates, QStringLiteral("download"));
+    QAction* checkOnStartup = m_moreMenu->addAction(tr("Check for updates at startup"));
+    checkOnStartup->setCheckable(true);
+    checkOnStartup->setChecked(updates::checkOnStartup());
+    connect(checkOnStartup, &QAction::toggled, this, [](bool on) { updates::setCheckOnStartup(on); });
     QAction* about = m_moreMenu->addAction(tr("About Kolorit"), this, &MainWindow::showAbout);
     m_iconNames.insert(about, QStringLiteral("info"));
     m_moreMenu->addAction(tr("About Qt"), qApp, &QApplication::aboutQt);
@@ -1732,6 +1741,59 @@ void MainWindow::showAbout()
             .arg(QCoreApplication::applicationVersion())
             .arg(QThreadPool::globalInstance()->maxThreadCount())
             .arg(QString::fromLatin1(qVersion())));
+}
+
+void MainWindow::checkForUpdates()
+{
+    runUpdateCheck(false);
+}
+
+void MainWindow::checkForUpdatesOnStartup()
+{
+    if (updates::checkOnStartup())
+        runUpdateCheck(true);
+}
+
+void MainWindow::runUpdateCheck(bool quiet)
+{
+    // One check at a time: the menu item waits for the answer
+    if (!m_actCheckUpdates->isEnabled())
+        return;
+    m_actCheckUpdates->setEnabled(false);
+    updates::fetchLatest(this, [this, quiet](const std::optional<updates::Release>& release, const QString& error) {
+        m_actCheckUpdates->setEnabled(true);
+        const QString current = QCoreApplication::applicationVersion();
+        if (!release) {
+            if (!quiet)
+                QMessageBox::warning(this, tr("Updates"), tr("Could not check for updates: %1").arg(error));
+            return;
+        }
+        const QString latest = release->version.toString();
+        if (!updates::isNewer(*release, current)) {
+            if (!quiet)
+                QMessageBox::information(this, tr("Updates"), tr("You have the latest version, Kolorit %1.").arg(current));
+            return;
+        }
+        if (quiet && updates::skippedVersion() == latest)
+            return;
+
+        QMessageBox box(this);
+        box.setWindowTitle(tr("Update available"));
+        box.setIcon(QMessageBox::Information);
+        box.setText(tr("<b>Kolorit %1 is available</b>").arg(latest));
+        box.setInformativeText(tr("You have version %1. The download opens in the browser.").arg(current));
+        if (!release->notes.isEmpty())
+            box.setDetailedText(release->notes);
+        QPushButton* download = box.addButton(tr("Download"), QMessageBox::AcceptRole);
+        QPushButton* skip = box.addButton(tr("Skip this version"), QMessageBox::DestructiveRole);
+        box.addButton(tr("Later"), QMessageBox::RejectRole);
+        box.setDefaultButton(download);
+        box.exec();
+        if (box.clickedButton() == download)
+            QDesktopServices::openUrl(QUrl(release->downloadUrl));
+        else if (box.clickedButton() == skip)
+            updates::setSkippedVersion(latest);
+    });
 }
 
 void MainWindow::closeEvent(QCloseEvent* event)

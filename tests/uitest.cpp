@@ -8,6 +8,7 @@
 // pipeline, waits for the background preview and saves widget snapshots as PNG.
 // Settings are written to a temporary folder so the user's settings are not touched.
 
+#include "app/Updates.h"
 #include "core/BuiltinPalettes.h"
 #include "core/Palette.h"
 #include "processing/Effects.h"
@@ -385,6 +386,30 @@ int main(int argc, char* argv[])
         snapshot(russianWindow, outDir, "15_main_russian");
         russianWindow.close();
         QCoreApplication::removeTranslator(&russian);
+    }
+
+    // --- Update check: parsing a GitHub "latest release" answer, without the network ---
+    {
+        const QByteArray json = R"({
+            "tag_name": "v1.2.0",
+            "html_url": "https://github.com/Kalikoff/Kolorit/releases/tag/v1.2.0",
+            "body": "Notes",
+            "assets": [
+                {"name": "Kolorit-v1.2.0-windows-x64.zip", "browser_download_url": "https://example.com/win.zip"},
+                {"name": "Kolorit-v1.2.0-macos-universal.dmg", "browser_download_url": "https://example.com/mac.dmg"}
+            ]
+        })";
+        const auto release = updates::parseRelease(json);
+        expect(release && release->version == QVersionNumber(1, 2, 0), "update: version parsed");
+#if defined(Q_OS_MACOS)
+        expect(release && release->downloadUrl == QStringLiteral("https://example.com/mac.dmg"), "update: macOS asset");
+#elif defined(Q_OS_WIN)
+        expect(release && release->downloadUrl == QStringLiteral("https://example.com/win.zip"), "update: Windows asset");
+#endif
+        expect(release && updates::isNewer(*release, QStringLiteral("1.1.0")), "update: newer than 1.1.0");
+        expect(release && !updates::isNewer(*release, QStringLiteral("1.2.0")), "update: not newer than itself");
+        expect(release && !updates::isNewer(*release, QStringLiteral("1.10.0")), "update: numeric comparison");
+        expect(!updates::parseRelease(R"({"message": "Not Found"})"), "update: error answer rejected");
     }
 
     window.close();

@@ -21,7 +21,7 @@ foreach(cfg ${CMAKE_CONFIGURATION_TYPES})
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_${CFG} ${CMAKE_BINARY_DIR}/bin)
 endforeach()
 
-find_package(Qt6 6.10 REQUIRED COMPONENTS Core Gui Widgets Concurrent Svg LinguistTools)
+find_package(Qt6 6.10 REQUIRED COMPONENTS Core Gui Widgets Concurrent Svg Network LinguistTools)
 qt_standard_project_setup()
 # qt_standard_project_setup only enables AUTOMOC/AUTOUIC; .qrc resources go through AUTORCC
 set(CMAKE_AUTORCC ON)
@@ -80,6 +80,8 @@ target_compile_definitions(kolorit_core PUBLIC KOLORIT_VERSION="${PROJECT_VERSIO
 add_library(kolorit_ui STATIC
     src/app/AppPaths.h
     src/app/AppPaths.cpp
+    src/app/Updates.h
+    src/app/Updates.cpp
     src/ui/Theme.h
     src/ui/Theme.cpp
     src/ui/MainWindow.h
@@ -107,7 +109,7 @@ add_library(kolorit_ui STATIC
     src/ui/VhsDialog.h
     src/ui/VhsDialog.cpp
 )
-target_link_libraries(kolorit_ui PUBLIC kolorit_core Qt6::Widgets Qt6::Svg)
+target_link_libraries(kolorit_ui PUBLIC kolorit_core Qt6::Widgets Qt6::Svg Qt6::Network)
 
 # ---------------------------------------------------------------------------
 # Application

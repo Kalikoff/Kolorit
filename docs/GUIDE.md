@@ -253,6 +253,10 @@ live preview. Most dialogs can save their settings as named presets.
 - **Themes**: dark (the default), light and system, switched on the fly in `⋯ → Theme`.
 - **Language**: English or Russian, following the system language by default. `⋯ → Language`
   switches it and offers a restart.
+- **Updates**: at startup Kolorit asks GitHub in the background whether a newer release is out
+  and, if so, offers to download it (the file opens in the browser) or to skip that version.
+  Nothing is shown when there is no news or no network. `⋯ → Check for updates…` checks on demand,
+  and `⋯ → Check for updates at startup` turns the automatic check off.
 - **Threads**: the status bar has a spin box for the number of worker threads (by default,
   the number of CPU cores) and a zoom button with quick values.
 
@@ -308,7 +312,7 @@ Ready-made builds for Windows and macOS are on the
 tests both platforms on every push; pushing a tag such as `v1.0.1` also publishes a release with
 the zipped Windows build and the macOS disk image.
 
-Requirements: CMake 3.21 or newer, Qt 6.10 or newer (Core, Gui, Widgets, Concurrent, Svg,
+Requirements: CMake 3.21 or newer, Qt 6.10 or newer (Core, Gui, Widgets, Concurrent, Svg, Network,
 LinguistTools; the Image Formats add-on for WebP) and a C++20 compiler (MSVC 2022+, GCC 11+,
 Clang 14+). Kolorit is built and tested on Windows and macOS 13+.
 
@@ -444,6 +448,7 @@ src/
     BatchRunner        the command-line repaint
     Language           picking and loading the interface translation
     AppPaths           the working folders next to the executable
+    Updates            the update check against the latest GitHub release
 resources/           the VT323 font, the application icon and the SVG icon set
 translations/        Qt translation sources (.ts)
 tests/               selftest (core), uitest (interface, offscreen), a synthetic test image

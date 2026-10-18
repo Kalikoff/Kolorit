@@ -52,5 +52,8 @@ int main(int argc, char* argv[])
     if (args.size() > 1)
         window.openImageFile(args.at(1));
 
+    // Runs in the background; a dialog appears only if there is a new version
+    window.checkForUpdatesOnStartup();
+
     return app.exec();
 }

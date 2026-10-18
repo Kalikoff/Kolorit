@@ -105,6 +105,10 @@ public slots:
     void setLanguage(const QString& code);
     // Help
     void showAbout();
+    /// Look for a newer release on GitHub and report the result either way
+    void checkForUpdates();
+    /// The quiet check at startup, if enabled: speaks up only when there is a new version
+    void checkForUpdatesOnStartup();
 
 private slots:
     void onTaskStarted();
@@ -142,6 +146,8 @@ private:
     void updateActions();
     void updateStatus();
     QString imageFileFilter() const;
+    /// Update check; a quiet one shows nothing on errors, without news or for a skipped version
+    void runUpdateCheck(bool quiet);
 
     // Images: the original (as loaded) and the working image of the current history step
     QImage m_original;
@@ -205,6 +211,7 @@ private:
     QAction* m_actPaste = nullptr;
     QAction* m_actSave = nullptr;
     QAction* m_actExit = nullptr;
+    QAction* m_actCheckUpdates = nullptr;
     QAction* m_actRepaint = nullptr;
     QAction* m_actCancel = nullptr;
     QAction* m_actShowOriginal = nullptr;
